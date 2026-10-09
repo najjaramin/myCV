@@ -1,8 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-cd "$(dirname "$0")"
-
-docker build -t mini-cv .
-docker rm -f mini-cv || true
-docker run -d --name mini-cv -p 8081:80 --restart unless-stopped mini-cv
+docker build -t cv-docker .
+docker rm -f cv-portfolio 2>/dev/null || true
+docker run -d \
+  --name cv-portfolio \
+  -p 8081:80 \
+  --restart unless-stopped \
+  cv-docker

@@ -1,239 +1,237 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CV d'Amin Najjar, étudiant en Master DevOps, spécialisé en réseaux, systèmes et supervision IT.">
-  <title>Amin Najjar | CV - Master DevOps</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfolio personnel et DevSecOps d'Amin Najjar : compétences, projets et expériences IT.">
+  <title>Amin Najjar | DevSecOps Portfolio</title>
   <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
-  <header>
-    <div class="header-content">
-      <p class="subtitle">CURRICULUM VITAE</p>
-      <h1>Amin Najjar</h1>
-      <h2>Étudiant en Master DevOps</h2>
-      <p>
-        Réseaux Et Servise informatiques · Systèmes · Cloud & DevOps
-      </p>
+  <header class="header">
+    <nav class="navbar container" aria-label="Navigation principale">
+      <a class="logo" href="#home">AN<span>.</span></a>
 
-      <div class="header-actions">
-        <a href="#contact" class="button">Me contacter</a>
-        <button id="theme" type="button">Thème sombre</button>
+      <button class="menu-toggle" id="menu-toggle"
+              aria-label="Ouvrir le menu" aria-expanded="false">
+        ☰
+      </button>
+
+      <div class="nav-links" id="nav-links">
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+        <button id="theme-toggle" class="theme-toggle"
+                type="button" aria-label="Changer le thème">
+          ☾
+        </button>
       </div>
-    </div>
+    </nav>
   </header>
 
-  <div class="container">
-    <aside>
-      <section id="contact">
-        <h2>Contact</h2>
-        <ul>
-          <li>
-            <strong>Email :</strong>
-            <a href="mailto:VOTRE_EMAIL">aminnajjar3@gmail.com</a>
-          </li>
-          <li>
-            <strong>GitHub :</strong>
+  <main>
+    <section id="home" class="hero">
+      <div class="container hero-content">
+        <p class="eyebrow">WELCOME TO MY PORTFOLIO</p>
+        <h1>Amin <span>Najjar</span></h1>
+        <h2>IT Student | DevOps & Cloud Enthusiast</h2>
+        <p class="hero-description">
+          Passionné par les systèmes informatiques, le Cloud,
+          l'automatisation et les pratiques DevSecOps.
+          Je développe mes compétences à travers des projets pratiques.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">Découvrir mes projets</a>
+          <a href="#contact" class="btn btn-outline">Me contacter</a>
+        </div>
+
+        <div class="hero-tags">
+          <span>Linux</span>
+          <span>Docker</span>
+          <span>Git</span>
+          <span>Cloud</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container">
+        <p class="eyebrow">INTRODUCTION</p>
+        <h2 class="section-title">About Me</h2>
+
+        <div class="about-card">
+          <p>
+            Je suis étudiant en Master DevOps, titulaire d'une licence
+            en Réseaux et Services Informatiques de l'ISET Tozeur.
+            Je m'intéresse à l'administration des systèmes, aux réseaux,
+            à la conteneurisation et à l'automatisation des déploiements.
+          </p>
+          <p>
+            Mon objectif est de développer des solutions fiables,
+            automatisées et sécurisées tout en approfondissant mes
+            connaissances en DevOps et Cloud Computing.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section section-alt">
+      <div class="container">
+        <p class="eyebrow">TECHNICAL KNOWLEDGE</p>
+        <h2 class="section-title">Skills</h2>
+
+        <div class="skills-grid">
+          <article class="skill-card">
+            <h3>Systems & Networks</h3>
+            <p>Linux, administration système, réseaux informatiques</p>
+          </article>
+
+          <article class="skill-card">
+            <h3>Development</h3>
+            <p>HTML5, CSS3, JavaScript, Python</p>
+          </article>
+
+          <article class="skill-card">
+            <h3>Monitoring</h3>
+            <p>Zabbix, Grafana, SNMP</p>
+          </article>
+
+          <article class="skill-card">
+            <h3>Virtualization</h3>
+            <p>Docker, VMware, PNETLab</p>
+          </article>
+        </div>
+
+        <h3 class="subsection-title">DevSecOps Skills</h3>
+        <p class="section-description">
+          Technologies étudiées ou utilisées dans le cadre de
+          l'apprentissage et des projets DevSecOps.
+        </p>
+
+        <div class="devsecops-grid">
+          <div class="technology"><span>01</span><strong>Git</strong><small>Version Control</small></div>
+          <div class="technology"><span>02</span><strong>Docker</strong><small>Containers</small></div>
+          <div class="technology"><span>03</span><strong>Jenkins</strong><small>CI/CD</small></div>
+          <div class="technology"><span>04</span><strong>Kubernetes</strong><small>Orchestration</small></div>
+          <div class="technology"><span>05</span><strong>Ansible</strong><small>Automation</small></div>
+          <div class="technology"><span>06</span><strong>Terraform</strong><small>Infrastructure as Code</small></div>
+          <div class="technology"><span>07</span><strong>Argo CD</strong><small>GitOps</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="container">
+        <p class="eyebrow">WHAT I'VE BEEN WORKING ON</p>
+        <h2 class="section-title">Projects</h2>
+        <p class="section-description">
+          Les projets ci-dessous sont affichés dynamiquement à l'aide
+          d'un tableau d'objets JavaScript.
+        </p>
+
+        <div id="projects-container" class="projects-grid">
+          <p>Chargement des projets...</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience" class="section section-alt">
+      <div class="container">
+        <p class="eyebrow">MY JOURNEY</p>
+        <h2 class="section-title">Experience & Education</h2>
+
+        <div class="timeline">
+          <article class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-card">
+              <p class="timeline-date">2026 – 2027</p>
+              <h3>Master DevOps</h3>
+              <p>Formation en cours — à compléter avec le nom de l'établissement.</p>
+            </div>
+          </article>
+
+          <article class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-card">
+              <p class="timeline-date">2024 – 2025</p>
+              <h3>Licence en Réseaux et Services Informatiques</h3>
+              <p>ISET Tozeur</p>
+            </div>
+          </article>
+
+          <article class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-card">
+              <p class="timeline-date">Projet de fin d'études</p>
+              <h3>Supervision des infrastructures IT</h3>
+              <p>
+                Projet de supervision des infrastructures informatiques
+                de la BNA avec Zabbix, Grafana et SNMP.
+              </p>
+            </div>
+          </article>
+
+          <article class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-card">
+              <p class="timeline-date">Stages</p>
+              <h3>Environnements professionnels IT</h3>
+              <p>
+                Expériences de stage chez MAE, BNA et Telecom.
+                Ajouter les dates et les missions exactes.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <p class="eyebrow">LET'S CONNECT</p>
+        <h2 class="section-title">Contact</h2>
+        <p class="section-description">
+          Pour discuter d'un projet, d'une collaboration ou d'une opportunité.
+        </p>
+
+        <div class="contact-grid">
+          <article class="contact-card">
+            <span class="contact-icon">☎</span>
+            <h3>Téléphone</h3>
+            <a href="tel:+21623975681">+216 23 975 681</a>
+          </article>
+
+          <article class="contact-card">
+  <span class="contact-icon">✉</span>
+  <h3>Email</h3>
+  <a href="mailto:aminnajjar3@gmail.com">
+    aminnajjar3@gmail.com
+  </a>
+</article>
+
+          <article class="contact-card">
+            <span class="contact-icon">⌘</span>
+            <h3>GitHub</h3>
             <a href="https://github.com/najjaramin"
                target="_blank" rel="noopener noreferrer">
               github.com/najjaramin
             </a>
-          </li>
-          <li><strong>Localisation :</strong> Tunisie</li>
-        </ul>
-      </section>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      <section>
-        <h2>Compétences techniques</h2>
-
-        <h3>Systèmes et DevOps</h3>
-        <ul>
-          <li>Linux</li>
-          <li>Docker et Docker Compose</li>
-          <li>Git et GitHub</li>
-          <li>Notions de CI/CD</li>
-        </ul>
-
-        <h3>Réseaux informatiques</h3>
-        <ul>
-          <li>TCP/IP et services réseau</li>
-          <li>SNMP</li>
-          <li>VPN IPsec / IKEv2</li>
-          <li>VMware et PNETLab</li>
-        </ul>
-
-        <h3>Supervision IT</h3>
-        <ul>
-          <li>Zabbix</li>
-          <li>Grafana</li>
-        </ul>
-
-        <h3>Développement et bases de données</h3>
-        <ul>
-          <li>HTML5, CSS3 et JavaScript</li>
-          <li>Python et Node.js</li>
-          <li>PostgreSQL et MongoDB</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Langues</h2>
-        <ul>
-          <li>Arabe</li>
-          <li>Français</li>
-          <li>Anglais</li>
-        </ul>
-        <p class="note">
-          Les niveaux linguistiques peuvent être ajoutés selon
-          votre niveau réel.
-        </p>
-      </section>
-    </aside>
-
-    <main>
-      <section>
-        <h2>Profil professionnel</h2>
-        <p>
-          Étudiant en première année de Master DevOps, titulaire
-          d'une licence en Réseaux et Services Informatiques de
-          l'Institut Supérieur des Études Technologiques de Tozeur.
-          Intéressé par l'administration des systèmes, les réseaux,
-          la supervision des infrastructures IT, l'automatisation
-          et les technologies Cloud. Je souhaite développer mes
-          compétences techniques et contribuer à des projets
-          informatiques concrets.
-        </p>
-      </section>
-
-      <section>
-        <h2>Formation</h2>
-
-        <article>
-          <h3>Master DevOps — Première année</h3>
-          <p class="institution">
-            Formation en cours · 2026–2027
-          </p>
-          <p>
-            Orientation : automatisation, conteneurisation,
-            intégration et déploiement continus, infrastructures
-            et Cloud.
-          </p>
-        </article>
-
-        <article>
-          <h3>Licence appliquée en Réseaux et Services Informatiques</h3>
-          <p class="institution">
-            Institut Supérieur des Études Technologiques de Tozeur
-            · 2024–2025
-          </p>
-          <p>
-            Formation en réseaux informatiques, systèmes et services IT.
-          </p>
-        </article>
-
-        <article>
-          <h3>Baccalauréat en économie</h3>
-          <p>
-            Formation initiale en économie.
-          </p>
-        </article>
-      </section>
-
-      <section>
-        <h2>Stages et expériences</h2>
-
-        <article>
-          <h3>Banque Nationale Agricole (BNA)</h3>
-          <p class="institution">
-            Projet de fin d'études (PFE)
-          </p>
-          <p>
-            <strong>
-              Déploiement d'une plateforme de supervision des
-              infrastructures IT de la BNA utilisant Zabbix.
-            </strong>
-          </p>
-          <ul>
-            <li>
-              Étude et mise en place d'une solution de supervision
-              des infrastructures informatiques.
-            </li>
-            <li>
-              Utilisation de Zabbix pour la supervision et le suivi
-              des équipements et services IT.
-            </li>
-            <li>
-              Étude des technologies de collecte des métriques
-              réseau, notamment SNMP.
-            </li>
-            <li>
-              Environnement de laboratoire : VMware et PNETLab.
-            </li>
-          </ul>
-        </article>
-
-        <article>
-          <h3>MAE</h3>
-          <p>
-            Stage professionnel — détails de la mission à compléter.
-          </p>
-        </article>
-
-        <article>
-          <h3>Telecom</h3>
-          <p>
-            Stage professionnel — détails de la mission à compléter.
-          </p>
-        </article>
-      </section>
-
-      <section>
-        <h2>Projets informatiques</h2>
-
-        <article>
-          <h3>Plateforme de supervision IT — BNA</h3>
-          <p>
-            Projet de fin d'études consacré à la supervision
-            d'infrastructures IT avec Zabbix, Grafana et SNMP.
-          </p>
-          <p>
-            <strong>Technologies :</strong>
-            Zabbix, Grafana, SNMP, VMware, PNETLab.
-          </p>
-        </article>
-
-        <article>
-          <h3>Développement de ce CV en ligne</h3>
-          <p>
-            Création d'un site web personnel responsive avec
-            HTML, CSS et JavaScript, versionné avec Git et GitHub.
-          </p>
-          <p>
-            <a href="https://github.com/najjaramin/myCV"
-               target="_blank" rel="noopener noreferrer">
-              Voir le code source sur GitHub
-            </a>
-          </p>
-        </article>
-      </section>
-
-      <section>
-        <h2>Objectif professionnel</h2>
-        <p>
-          Évoluer dans les domaines du DevOps, du Cloud,
-          de l'administration systèmes et réseaux et de la
-          supervision des infrastructures informatiques.
-        </p>
-      </section>
-
-      <footer>
-        <p>© <span id="year"></span> Amin Najjar — CV en ligne</p>
-      </footer>
-    </main>
-  </div>
-
-  <script src="script.js"></script>
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="current-year"></span> Amin Najjar — DevSecOps Portfolio</p>
+      <a href="#home">Retour en haut ↑</a>
+    </div>
+  </footer>
 </body>
 </html>
