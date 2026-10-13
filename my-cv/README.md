@@ -140,3 +140,60 @@ Capture d'écran : publication réussie et état final de Git.
 ## 9. Conclusion
 
 Docker et Nginx permettent de servir le portfolio dans un conteneur. Docker Compose facilite le déploiement du service, tandis que Git et GitHub assurent le suivi et le partage des modifications.
+
+## Point 17 : configuration automatique de la VM
+
+Le Vagrantfile configure le nom, l'adresse IP privée, la mémoire et le nombre de CPU :
+
+```ruby
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2204"
+  config.vm.boot_timeout = 1200
+
+  config.vm.define "ubuntu-devsecops" do |vm|
+    # Nom de la machine (hostname dans le système)
+    vm.vm.hostname = "ubuntu-devsecops"
+
+    # Adresse IP privée
+    vm.vm.network "private_network", ip: "192.168.56.10"
+
+    vm.vm.provider "libvirt" do |lv|
+      # Nom de la VM côté libvirt (sans préfixe automatique)
+      lv.default_prefix = ""
+
+      # Émulation logicielle (pas de virtualisation imbriquée)
+      lv.driver = "qemu"
+      lv.cpu_mode = "custom"
+      lv.cpu_model = "qemu64"
+
+      # Ressources
+      lv.memory = 1024
+      lv.cpus = 2
+    end
+
+    vm.vm.provision "shell", inline: <<-SHELL
+      echo "VM prête : $(hostname)"
+      lsb_release -d
+    SHELL
+  end
+end
+```
+
+### Résultat de `vagrant status`
+
+```text
+Current machine states:
+
+ubuntu-devsecops          not created (libvirt)
+
+The Libvirt domain is not created. Run `vagrant up` to create it.
+```
+
+![vagrant status](captures/vagrant-status.png)
+
+| Paramètre | Valeur |
+|---|---|
+| Nom de la VM | ubuntu-devsecops |
+| IP privée | 192.168.56.10 |
+| Mémoire | 1024 Mo |
+| CPU | 2 |

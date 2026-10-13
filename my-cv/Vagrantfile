@@ -1,0 +1,31 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2204"
+  config.vm.boot_timeout = 1200
+
+  config.vm.define "ubuntu-devsecops" do |vm|
+    # Nom de la machine (hostname dans le système)
+    vm.vm.hostname = "ubuntu-devsecops"
+
+    # Adresse IP privée
+    vm.vm.network "private_network", ip: "192.168.56.10"
+
+    vm.vm.provider "libvirt" do |lv|
+      # Nom de la VM côté libvirt (sans préfixe automatique)
+      lv.default_prefix = ""
+
+      # Émulation logicielle (pas de virtualisation imbriquée)
+      lv.driver = "qemu"
+      lv.cpu_mode = "custom"
+      lv.cpu_model = "qemu64"
+
+      # Ressources
+      lv.memory = 1024
+      lv.cpus = 2
+    end
+
+    vm.vm.provision "shell", inline: <<-SHELL
+      echo "VM prête : $(hostname)"
+      lsb_release -d
+    SHELL
+  end
+end
