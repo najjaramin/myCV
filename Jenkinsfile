@@ -11,9 +11,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 dir('my-cv-next') {
-                    sh '/home/amin/.nvm/versions/node/v22.23.3/bin/node --version'
-                    sh '/home/amin/.nvm/versions/node/v22.23.3/bin/npm --version'
-                    sh '/home/amin/.nvm/versions/node/v22.23.3/bin/npm ci'
+                    sh 'node --version'
+                    sh 'npm --version'
+                    sh 'npm ci'
                 }
             }
         }
@@ -21,7 +21,7 @@ pipeline {
         stage('Build Next.js') {
             steps {
                 dir('my-cv-next') {
-                    sh '/home/amin/.nvm/versions/node/v22.23.3/bin/npm run build'
+                    sh 'npm run build'
                 }
             }
         }
@@ -36,4 +36,3 @@ pipeline {
         }
     }
 }
-
