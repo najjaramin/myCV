@@ -75,3 +75,47 @@ Les enregistrer dans `docs/screenshots/`, puis ajouter :
 ![Liste des projets](docs/screenshots/projects.png)
 
 ![Détail d'un projet](docs/screenshots/project-detail.png)
+
+
+## VI. CI/CD avec Jenkins
+
+### 22. Création du pipeline Jenkins
+
+Un pipeline Jenkins a été configuré pour récupérer automatiquement le dépôt GitHub du projet DevSecOps Portfolio.
+
+- **Repository :** `git@github.com:najjaramin/myCV.git`
+- **Branche :** `main`
+- **Jenkinsfile :** fichier de configuration du pipeline situé à la racine du dépôt.
+- **Authentification :** connexion SSH à GitHub via des credentials Jenkins.
+
+Le stage `Checkout` permet de récupérer le code source depuis GitHub.
+
+![Checkout GitHub](docs/screenshots/pipeline-checkout.png)
+
+### 23. Installation des dépendances
+
+Le pipeline utilise la commande `npm ci` dans le répertoire `my-cv-next` pour installer les dépendances définies dans `package-lock.json`.
+
+Les versions utilisées pendant l'exécution sont :
+
+- **Node.js :** `v22.23.3`
+- **npm :** `10.9.9`
+- **Dépendances installées :** 350 packages
+
+![Installation des dépendances](docs/screenshots/pipeline-install.png)
+
+### 24. Construction automatique de l'application Next.js
+
+Le stage `Build Next.js` exécute la commande `npm run build` afin de compiler l'application et de vérifier sa préparation pour la production.
+
+Le build s'est terminé avec succès. Next.js a compilé l'application, vérifié le code TypeScript et généré les pages statiques.
+
+Commande exécutée :
+
+```bash
+npm run build
+```
+
+Résultat Jenkins : `Finished: SUCCESS`
+
+![Build Next.js](docs/screenshots/pipeline-build.png)
