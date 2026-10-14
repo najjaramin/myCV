@@ -268,7 +268,7 @@ export default function Home() {
       <footer className="footer wrap">
         <a className="logo" href="#home">AN<span>.</span></a>
         <p>Designed with curiosity. Built to keep improving.</p>
-        <span>© {new Date().getFullYear()} Amin Najjar</span>
+         <span>© 2026 Amin Najjar</span>
       </footer>
     </main>
   );
