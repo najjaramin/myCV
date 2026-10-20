@@ -100,6 +100,27 @@ La route retourne le statut HTTP `200 OK` lorsque l'API répond correctement.
 
 
 
+## Étape 32 — Route GET /api/projects
+
+### Objectif
+Créer une route API qui retourne la liste des projets du portfolio au format JSON.
+
+### Endpoint
+`GET /api/projects`
+
+### Test
+```bash
+curl -i http://localhost:4000/api/projects
+```
+
+### Résultat attendu
+La réponse HTTP est `200 OK` et contient un tableau JSON avec les projets, leurs descriptions, les technologies utilisées et leur statut.
+
+### Capture d’écran
+`api/screenshots/32-api-projects.png`
+
+
+
 ## Auteur
 
 Amin Najjar
