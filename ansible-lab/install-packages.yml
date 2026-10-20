@@ -1,4 +1,3 @@
-
 ---
 - name: Installer curl et git sur les machines cibles
   hosts: targets

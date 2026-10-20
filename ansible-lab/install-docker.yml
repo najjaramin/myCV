@@ -1,0 +1,21 @@
+---
+- name: Installer Docker sur les machines cibles
+  hosts: targets
+  become: true
+
+  tasks:
+    - name: Mettre à jour le cache APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Installer Docker
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+
+    - name: Démarrer et activer le service Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true

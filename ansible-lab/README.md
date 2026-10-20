@@ -1,74 +1,39 @@
-# Exercice 26 : Ansible inventory et test de communication
-
-## Objectif
-
-Créer un fichier `inventory` contenant l'adresse IP du serveur Ubuntu cible, puis tester la communication avec :
-
-```bash
-ansible all -m ping
-```
+# TP Ansible : exercices 26, 27 et 28
 
 ## Environnement
 
 | Machine | Rôle | Adresse IP |
 |---|---|---|
 | `server` | Nœud de contrôle (Ansible) | 192.168.30.167 |
-| `master` | Serveur Ubuntu cible | 192.168.30.172 |
+| `master` | Serveur Ubuntu 26.04 cible | 192.168.30.172 |
 
 ## Fichiers
 
-- `inventory.ini` / `inventory` : inventaire Ansible
-- `ansible.cfg` : configuration d'Ansible
-- `install-packages.yml` : playbook d'installation de `curl` et `git`
+- `inventory` / `inventory.ini` : inventaire Ansible
+- `ansible.cfg` : configuration Ansible
+- `install-packages.yml` : installation de curl et git (exercice 27)
+- `install-docker.yml` : installation de Docker (exercice 28)
 
-## Inventory
+---
+
+## Exercice 26 : Inventory et ping
+
+### Inventory
 
 ```ini
 [targets]
 master ansible_host=192.168.30.172 ansible_user=master
 ```
 
-## Configuration (`ansible.cfg`)
-
-```ini
-[defaults]
-inventory = inventory.ini
-
-[privilege_escalation]
-become_flags = -H -S
-
-[ssh_connection]
-ssh_args = -o ControlMaster=auto -o ControlPersist=60s
-```
-
-## Authentification SSH par clé
+### Commandes
 
 ```bash
-ssh-keygen -t ed25519
-ssh-copy-id master@192.168.30.172
-ssh master@192.168.30.172
-```
-
-La connexion s'effectue sans mot de passe.
-
-## Commandes
-
-```bash
-# Test avec le fichier inventory
 ansible all -i inventory -m ping
-
-# Avec ansible.cfg (inventory.ini par défaut)
-ansible all -m ping
-
-# Lister les hôtes et l'inventaire
 ansible all --list-hosts
 ansible-inventory --list
-
-# Playbook
-ansible-playbook install-packages.yml
 ```
 
-## Résultat attendu
+### Résultat
 
 ```text
 master | SUCCESS => {
@@ -77,21 +42,135 @@ master | SUCCESS => {
 }
 ```
 
-Le playbook retourne `ok=2 changed=0 failed=0` (curl et git sont déjà installés, le playbook est idempotent).
+### Captures d'écran
 
-## Captures d'écran
-
-### 1. Inventory (hôtes et inventaire)
 ![Inventory](screenshots/Act3/01-inventory.png)
-
-### 2. `ansible all -m ping`
 ![Ansible ping](screenshots/Act3/02-ansible-ping.png)
-
-### 3. Playbook `install-packages.yml`
 ![Playbook](screenshots/Act3/03-playbook.png)
+![Connexion SSH par clé](screenshots/Act3/04-ssh-key.png)
 
-### 4. Connexion SSH par clé
-![SSH key](screenshots/Act3/04-ssh-key.png)
+---
+
+## Exercice 27 : Premier playbook, installation de packages
+
+### Objectif
+
+Créer un premier playbook Ansible qui installe automatiquement des packages Linux (`curl` et `git`) sur la machine cible.
+
+### Playbook : `install-packages.yml`
+
+```yaml
+---
+- name: Installer curl et git sur les machines cibles
+  hosts: targets
+  become: true
+
+  tasks:
+    - name: Installer curl et git
+      ansible.builtin.apt:
+        name:
+          - curl
+          - git
+        state: present
+        update_cache: true
+```
+
+### Exécution
+
+```bash
+ansible-playbook -i inventory.ini install-packages.yml --ask-pass --ask-become-pass
+```
+
+Résultat : `ok=2 changed=0 failed=0`. Les packages étaient déjà présents, le playbook est donc idempotent.
+
+### Vérification
+
+```bash
+ansible -i inventory.ini targets -m command -a "curl --version" --ask-pass
+ansible -i inventory.ini targets -m command -a "git --version" --ask-pass
+```
+
+Résultat : `curl 8.18.0` et `git version 2.53.0`.
+
+### Captures d'écran
+
+Exécution du playbook :
+
+![Exécution install-packages](screenshots/05-install-packages.png)
+
+Vérification des versions :
+
+![Vérification curl et git](screenshots/06-verification-curl-git.png)
+
+---
+
+## Exercice 28 : Installation automatique de Docker
+
+### Objectif
+
+Créer un playbook Ansible qui installe Docker sur une nouvelle VM Ubuntu, puis démarre et active le service.
+
+### Playbook : `install-docker.yml`
+
+```yaml
+---
+- name: Installer Docker sur les machines cibles
+  hosts: targets
+  become: true
+
+  tasks:
+    - name: Mettre à jour le cache APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Installer Docker
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+
+    - name: Démarrer et activer le service Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+```
+
+### Exécution
+
+```bash
+ansible-playbook -i inventory.ini install-docker.yml --ask-pass --ask-become-pass
+```
+
+Résultat : `ok=4 changed=1 failed=0`. Docker a été installé lors de cette exécution (`changed=1` sur la tâche « Installer Docker »).
+
+### Résultat de `docker --version`
+
+```bash
+ansible -i inventory.ini targets -m command -a "docker --version" --ask-pass
+```
+
+```text
+master | CHANGED | rc=0 >>
+Docker version 29.1.3, build 29.1.3-0ubuntu4.1
+```
+
+### Vérification du service
+
+```bash
+ansible -i inventory.ini targets -m command -a "systemctl is-active docker" --ask-pass
+```
+
+```text
+master | CHANGED | rc=0 >>
+active
+```
+
+### Capture d'écran
+
+![Docker installé : version et service actif](screenshots/08-verification-docker.png)
+
+---
 
 ## Auteur
 
