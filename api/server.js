@@ -1,4 +1,3 @@
-
 const express = require("express");
 
 const app = express();
@@ -13,11 +12,28 @@ app.get("/", (req, res) => {
   });
 });
 
-// Exercice 30 : Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     message: "API is running"
+  });
+});
+
+app.get("/api/profile", (req, res) => {
+  res.status(200).json({
+    name: "Amin Najjar",
+    title: "Étudiant en Master DevOps",
+    education: [
+      "Licence en Réseaux et Services Informatiques",
+      "Master DevOps"
+    ],
+    interests: [
+      "DevOps",
+      "Cloud Computing",
+      "CI/CD",
+      "Kubernetes",
+      "Automatisation"
+    ]
   });
 });
 
