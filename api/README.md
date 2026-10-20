@@ -55,6 +55,51 @@ Réponse attendue :
 
 ![Serveur Node.js Express démarré](screenshots/9-api-server.png)
 
+
+## Exercice 30 — Route GET `/api/health`
+
+### Objectif
+
+Créer une route permettant de vérifier que l'API fonctionne correctement.
+
+### Endpoint
+
+`GET /api/health`
+
+### Implémentation
+
+```javascript
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "API is running"
+  });
+});
+```
+
+### Test
+
+```bash
+curl http://localhost:4000/api/health
+```
+
+### Résultat attendu
+
+```json
+{
+  "status": "OK",
+  "message": "API is running"
+}
+```
+
+La route retourne le statut HTTP `200 OK` lorsque l'API répond correctement.
+
+### Capture d'écran
+
+![Test de la route GET /api/health](screenshots/10-api-health.png)
+
+
+
 ## Auteur
 
 Amin Najjar

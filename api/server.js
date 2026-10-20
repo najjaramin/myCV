@@ -1,3 +1,4 @@
+
 const express = require("express");
 
 const app = express();
@@ -9,6 +10,14 @@ app.get("/", (req, res) => {
   res.json({
     message: "DevSecOps Portfolio API is running",
     status: "OK"
+  });
+});
+
+// Exercice 30 : Health check
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "API is running"
   });
 });
 
