@@ -94,13 +94,9 @@ Résultat : `curl 8.18.0` et `git version 2.53.0`.
 
 ### Captures d'écran
 
-Exécution du playbook :
+Exécution du playbook et Vérification des versions :
 
-![Exécution install-packages](screenshots/05-install-packages.png)
-
-Vérification des versions :
-
-![Vérification curl et git](screenshots/06-verification-curl-git.png)
+![Vérification curl et git](screenshots/Act3/06-verification-curl-git.png)
 
 ---
 
@@ -168,7 +164,7 @@ active
 
 ### Capture d'écran
 
-![Docker installé : version et service actif](screenshots/08-verification-docker.png)
+![Docker installé : version et service actif](screenshots/Act3/08-verification-docker.png)
 
 ---
 
