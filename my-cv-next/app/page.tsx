@@ -1,53 +1,4 @@
-
 import Image from "next/image";
-
-const skills = [
-  ["Git & GitHub", "Version control"],
-  ["Docker", "Containers"],
-  ["Jenkins", "CI/CD"],
-  ["Kubernetes", "Orchestration"],
-  ["Ansible", "Automation"],
-  ["Terraform", "Infrastructure as Code"],
-  ["Argo CD", "GitOps"],
-  ["Linux", "System administration"],
-  ["Zabbix & Grafana", "Monitoring"],
-  ["Networking", "Infrastructure"],
-];
-
-const projects = [
-  {
-    number: "01",
-    title: "IT Infrastructure Monitoring",
-    type: "FINAL YEAR PROJECT",
-    description:
-      "Deployment of an IT infrastructure monitoring platform using Zabbix, Grafana and SNMP in a banking environment.",
-    tags: ["Zabbix", "Grafana", "SNMP"],
-  },
-  {
-    number: "02",
-    title: "DevSecOps Portfolio",
-    type: "WEB & DEVOPS",
-    description:
-      "A personal portfolio built with Next.js, TypeScript and responsive CSS, designed to present my technical skills and projects.",
-    tags: ["Next.js", "React", "TypeScript"],
-  },
-  {
-    number: "03",
-    title: "Dockerized Web Application",
-    type: "CONTAINERIZATION",
-    description:
-      "Containerization of a web portfolio with Docker and Nginx, with a workflow designed for reproducible deployment.",
-    tags: ["Docker", "Nginx", "Compose"],
-  },
-  {
-    number: "04",
-    title: "Kubernetes Practice Lab",
-    type: "INFRASTRUCTURE LAB",
-    description:
-      "Hands-on learning with a multi-node Kubernetes cluster, Pods, Deployments, Services and application troubleshooting.",
-    tags: ["Kubernetes", "Linux", "VMware"],
-  },
-];
 
 const education = [
   {
@@ -66,7 +17,53 @@ const education = [
   },
 ];
 
-export default function Home() {
+async function getApiData(path: string) {
+  try {
+    const response = await fetch(`${process.env.API_URL || "http://127.0.0.1:4001"}${path}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.error(`API error ${path}: HTTP ${response.status}`);
+      return [];
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Impossible de contacter l'API: ${path}`, error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const [apiSkills, apiProjects] = await Promise.all([
+    getApiData("/api/skills"),
+    getApiData("/api/projects"),
+  ]);
+
+  const skills = apiSkills.map((skill: { name: string; category: string }) => [
+    skill.name,
+    skill.category,
+  ]);
+
+  const projects = apiProjects.map(
+    (
+      project: {
+        id: number;
+        name: string;
+        description: string;
+        technologies: string[];
+        status: string;
+      },
+      index: number,
+    ) => ({
+      number: String(index + 1).padStart(2, "0"),
+      title: project.name,
+      type: project.status.toUpperCase(),
+      description: project.description,
+      tags: project.technologies,
+    }),
+  );
   return (
     <main>
       <nav className="nav wrap">
@@ -198,13 +195,13 @@ export default function Home() {
             <p className="section-label">03 / SELECTED WORK</p>
             <h2>Projects &amp; <span>practice.</span></h2>
           </div>
-          <span className="project-total">04 PROJECTS</span>
+          <span className="project-total">{projects.length} PROJECTS</span>
         </div>
         <div className="projects-grid">
           {projects.map((project) => (
             <article className="project-card" key={project.number}>
               <div className="project-top">
-                <span>{project.number} / 04</span>
+                <span>{project.number} / {String(projects.length).padStart(2, "0")}</span>
                 <span className="project-icon">↗</span>
               </div>
               <p className="project-type">{project.type}</p>

@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: ./api
+    image: amin-portfolio-api:1.0
+    container_name: portfolio-api
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - "4001:4000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./my-cv-next
+      args:
+        API_URL: http://api:4000
+    image: amin-portfolio-frontend:1.0
+    container_name: portfolio-frontend
+    environment:
+      API_URL: http://api:4000
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
