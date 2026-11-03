@@ -1,54 +1,9 @@
-
 import Image from "next/image";
 
-const skills = [
-  ["Git & GitHub", "Version control"],
-  ["Docker", "Containers"],
-  ["Jenkins", "CI/CD"],
-  ["Kubernetes", "Orchestration"],
-  ["Ansible", "Automation"],
-  ["Terraform", "Infrastructure as Code"],
-  ["Argo CD", "GitOps"],
-  ["Linux", "System administration"],
-  ["Zabbix & Grafana", "Monitoring"],
-  ["Networking", "Infrastructure"],
-];
+export const instant = false;
 
-const projects = [
-  {
-    number: "01",
-    title: "IT Infrastructure Monitoring",
-    type: "FINAL YEAR PROJECT",
-    description:
-      "Deployment of an IT infrastructure monitoring platform using Zabbix, Grafana and SNMP in a banking environment.",
-    tags: ["Zabbix", "Grafana", "SNMP"],
-  },
-  {
-    number: "02",
-    title: "DevSecOps Portfolio",
-    type: "WEB & DEVOPS",
-    description:
-      "A personal portfolio built with Next.js, TypeScript and responsive CSS, designed to present my technical skills and projects.",
-    tags: ["Next.js", "React", "TypeScript"],
-  },
-  {
-    number: "03",
-    title: "Dockerized Web Application",
-    type: "CONTAINERIZATION",
-    description:
-      "Containerization of a web portfolio with Docker and Nginx, with a workflow designed for reproducible deployment.",
-    tags: ["Docker", "Nginx", "Compose"],
-  },
-  {
-    number: "04",
-    title: "Kubernetes Practice Lab",
-    type: "INFRASTRUCTURE LAB",
-    description:
-      "Hands-on learning with a multi-node Kubernetes cluster, Pods, Deployments, Services and application troubleshooting.",
-    tags: ["Kubernetes", "Linux", "VMware"],
-  },
-];
 
+     
 const education = [
   {
     date: "2025 — PRESENT",
@@ -66,8 +21,29 @@ const education = [
   },
 ];
 
-export default function Home() {
-  return (
+export default async function Home() {
+  const API_URL = process.env.API_URL || "http://localhost:4000";
+
+  const projectsResponse = await fetch(`${API_URL}/api/projects`, {
+    cache: "no-store",
+  });
+
+  if (!projectsResponse.ok) {
+    throw new Error("Impossible de récupérer les projets depuis l'API");
+  }
+
+  const projects = await projectsResponse.json();  
+const skillsResponse = await fetch(`${API_URL}/api/skills`, {
+  cache: "no-store",
+});
+
+if (!skillsResponse.ok) {
+  throw new Error("Impossible de récupérer les compétences depuis l'API");
+}
+
+const skills = await skillsResponse.json();
+
+return (
     <main>
       <nav className="nav wrap">
         <a className="logo" href="#home">AN<span>.</span></a>
@@ -174,12 +150,12 @@ export default function Home() {
             </p>
           </div>
           <div className="skills-grid">
-            {skills.map(([name, category], index) => (
-              <article className="skill-card" key={name}>
-                <span className="skill-index">{String(index + 1).padStart(2, "0")}</span>
+             {skills.map((skill, index) => (
+                 <article className="skill-card" key={skill.name}> 
+                 <span className="skill-index">{String(index + 1).padStart(2, "0")}</span>
                 <div>
-                  <h3>{name}</h3>
-                  <p>{category}</p>
+                <h3>{skill.name}</h3>
+                <p>{skill.category}</p>
                 </div>
                 <span className="skill-arrow">↗</span>
               </article>

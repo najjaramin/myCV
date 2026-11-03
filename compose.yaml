@@ -1,0 +1,26 @@
+services:
+  api:
+    build: ./api
+    image: devsecops-api:1.0
+    container_name: portfolio-api
+    ports:
+      - "4000:4000"
+    networks:
+      - portfolio-network
+
+  frontend:
+    build: ./my-cv-next
+    image: devsecops-portfolio:1.0
+    container_name: portfolio-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      API_URL: http://api:4000
+    depends_on:
+      - api
+    networks:
+      - portfolio-network
+
+networks:
+  portfolio-network:
+    driver: bridge
