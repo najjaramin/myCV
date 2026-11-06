@@ -5,6 +5,8 @@ pipeline {
         GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         IMAGE_API = "devsecops-api:${GIT_SHA}"
         IMAGE_FRONT = "devsecops-portfolio:${GIT_SHA}"
+        // Valeur factice: prisma generate ne se connecte pas à la base
+        DATABASE_URL = 'postgresql://user:pass@localhost:5432/db'
     }
 
     stages {
@@ -36,10 +38,8 @@ pipeline {
         stage('Generate Prisma Client') {
             steps {
                 echo 'Génération du client Prisma sur l\'hôte...'
-
-  withEnv(['DATABASE_URL=postgresql://user:pass@localhost:5432/db']) {
-                sh 'npx prisma generate'
-            }            }
+                dir('api') {
+                    sh 'npx prisma generate'
                 }
             }
         }
