@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Récupérer le SHA court du commit Git
         GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         IMAGE_API = "devsecops-api:${GIT_SHA}"
         IMAGE_FRONT = "devsecops-portfolio:${GIT_SHA}"
@@ -12,7 +11,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Récupération du code source...'
-                // Jenkins récupère automatiquement le dépôt configuré dans le job
                 checkout scm
             }
         }
@@ -31,6 +29,15 @@ pipeline {
                 echo 'Installation des dépendances de l\'API...'
                 dir('api') {
                     sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Generate Prisma Client') {
+            steps {
+                echo 'Génération du client Prisma sur l\'hôte...'
+                dir('api') {
+                    sh 'npx prisma generate'
                 }
             }
         }
