@@ -36,8 +36,10 @@ pipeline {
         stage('Generate Prisma Client') {
             steps {
                 echo 'Génération du client Prisma sur l\'hôte...'
-                dir('api') {
-                    sh 'npx prisma generate'
+
+  withEnv(['DATABASE_URL=postgresql://user:pass@localhost:5432/db']) {
+                sh 'npx prisma generate'
+            }            }
                 }
             }
         }
