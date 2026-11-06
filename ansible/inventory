@@ -1,0 +1,2 @@
+[portfolio]
+portfolio-vm ansible_host=192.168.121.118 ansible_user=vagrant ansible_ssh_private_key_file=/home/amin/portfolios/my-cv/vagrant/.vagrant/machines/default/libvirt/private_key ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'

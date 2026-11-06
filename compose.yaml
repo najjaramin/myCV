@@ -5,6 +5,31 @@ services:
     container_name: portfolio-api
     ports:
       - "4000:4000"
+    environment:
+      DATABASE_URL: "postgresql://amin:amin_password@db:5432/portfolio?schema=public"
+      PORT: 4000
+    depends_on:
+      db:
+        condition: service_healthy # Attend que Postgres soit prêt
+    networks:
+      - portfolio-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: portfolio-db
+    environment:
+      POSTGRES_USER: amin
+      POSTGRES_PASSWORD: amin_password
+      POSTGRES_DB: portfolio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U amin -d portfolio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - portfolio-network
 
@@ -20,6 +45,9 @@ services:
       - api
     networks:
       - portfolio-network
+
+volumes:
+  postgres_data: # Volume persistant pour ne pas perdre les données
 
 networks:
   portfolio-network:

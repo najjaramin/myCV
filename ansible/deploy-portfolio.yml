@@ -1,0 +1,97 @@
+---
+- name: Déployer le DevSecOps Portfolio avec Docker Compose
+  hosts: portfolio
+  become: true
+  vars:
+    repo_url: "https://github.com/najjaramin/myCV.git"
+    project_dir: "/opt/my-cv"
+    git_branch: "main"
+
+  tasks:
+    # ---------- 1. Mise à jour et prérequis ----------
+    - name: Mettre à jour le cache apt
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Installer les paquets de base
+      apt:
+        name:
+          - git
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    # ---------- 2. Installer Docker officiel ----------
+    - name: Créer le dossier des clés APT
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Ajouter la clé GPG de Docker
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Ajouter le dépôt Docker
+      apt_repository:
+        repo: "deb [arch={{ ansible_architecture | replace('x86_64','amd64') | replace('aarch64','arm64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Installer Docker et le plugin Compose
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+        dpkg_options: 'force-confold,force-confdef'
+      register: docker_install
+      retries: 3
+      delay: 10
+      until: docker_install is success
+
+    - name: S'assurer que Docker est démarré et activé
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # ---------- 3. Cloner le dépôt ----------
+    - name: Cloner le dépôt du portfolio
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ project_dir }}"
+        version: "{{ git_branch }}"
+        force: true
+
+    # ---------- 4. Déployer avec Docker Compose ----------
+    - name: Lancer Docker Compose (build + up)
+      command:
+        cmd: docker compose up -d --build
+        chdir: "{{ project_dir }}"
+
+    - name: Attendre que le frontend soit prêt
+      wait_for:
+        host: 127.0.0.1
+        port: 3000
+        timeout: 120
+
+    - name: Vérifier le conteneur API
+      command: docker compose ps
+      args:
+        chdir: "{{ project_dir }}"
+      register: compose_ps
+      changed_when: false
+
+    - name: Afficher l'état des services
+      debug:
+        var: compose_ps.stdout_lines
