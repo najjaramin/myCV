@@ -1,20 +1,17 @@
 FROM node:22-alpine
-
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
-# Copier le client Prisma généré sur l'hôte Jenkins
-COPY node_modules/.prisma ./node_modules/.prisma
-COPY node_modules/@prisma/client ./node_modules/@prisma/client
-
-# Copier la config et le schéma (nécessaires pour le runtime)
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
-# Copier le reste des fichiers
+# Valeur factice: prisma generate ne se connecte pas à la base
+ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+RUN npx prisma generate
+
 COPY server.js projects.js skills.js profile.js ./
 
 EXPOSE 4000
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
