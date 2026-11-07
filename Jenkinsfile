@@ -62,6 +62,14 @@ pipeline {
             }
         }
 
+stage('Gitleaks - Scan des secrets') {
+    steps {
+        echo 'Scan des secrets avec Gitleaks...'
+        sh 'gitleaks detect --source . --verbose --no-git --report-format json --report-path gitleaks-report.json || true'
+        sh 'cat gitleaks-report.json || echo "Aucun secret détecté"'
+    }
+}
+
 stage('Build API Image') {
     steps {
         echo "Construction de l'image ${IMAGE_API}..."
