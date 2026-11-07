@@ -2,10 +2,6 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Forcer le DNS dans le conteneur de build (contourne les problèmes de DNS de Docker)
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && \
-    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
