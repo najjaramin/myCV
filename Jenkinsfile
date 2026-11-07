@@ -62,20 +62,19 @@ pipeline {
             }
         }
 
-        stage('Build API Image') {
-            steps {
-                echo "Construction de l'image ${IMAGE_API}..."
-                sh "docker build -t ${IMAGE_API} -t devsecops-api:latest ./api"
-            }
-        }
+stage('Build API Image') {
+    steps {
+        echo "Construction de l'image ${IMAGE_API}..."
+        sh "docker build --no-cache -t ${IMAGE_API} -t devsecops-api:latest ./api"
+    }
+}
 
-        stage('Build Frontend Image') {
-            steps {
-                echo "Construction de l'image ${IMAGE_FRONT}..."
-                sh "docker build -t ${IMAGE_FRONT} -t devsecops-portfolio:latest ./my-cv-next"
-            }
-        }
-
+stage('Build Frontend Image') {
+    steps {
+        echo "Construction de l'image ${IMAGE_FRONT}..."
+        sh "docker build --no-cache -t ${IMAGE_FRONT} -t devsecops-portfolio:latest ./my-cv-next"
+    }
+}
         stage('Verify Images') {
             steps {
                 echo 'Vérification des images construites...'
