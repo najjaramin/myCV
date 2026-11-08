@@ -65,11 +65,17 @@ pipeline {
 stage('Gitleaks - Scan des secrets') {
     steps {
         echo 'Scan des secrets avec Gitleaks...'
-        sh 'gitleaks detect --source . --verbose --no-git --report-format json --report-path gitleaks-report.json || true'
-        sh 'cat gitleaks-report.json || echo "Aucun secret détecté"'
+        sh '''
+            gitleaks detect --source . --verbose --no-git --config .gitleaks.toml --report-format json --report-path gitleaks-report.json --exit-code=1 || true
+            if [ -f gitleaks-report.json ]; then
+                echo "Rapport Gitleaks :"
+                cat gitleaks-report.json
+            else
+                echo "Aucun secret détecté."
+            fi
+        '''
     }
 }
-
 stage('Build API Image') {
     steps {
         echo "Construction de l'image ${IMAGE_API}..."
@@ -105,7 +111,7 @@ stage('Gitleaks - Scan des secrets') {
     steps {
         echo 'Scan des secrets avec Gitleaks...'
         sh '''
-            gitleaks detect --source . --verbose --no-git --report-format json --report-path gitleaks-report.json || true
+            gitleaks detect --source . --verbose --no-git --config .gitleaks.toml --report-format json --report-path gitleaks-report.json --exit-code=1 || true
             if [ -f gitleaks-report.json ]; then
                 echo "Rapport Gitleaks :"
                 cat gitleaks-report.json
