@@ -100,3 +100,18 @@ stage('Build Frontend Image') {
         }
     }
 }
+
+stage('Gitleaks - Scan des secrets') {
+    steps {
+        echo 'Scan des secrets avec Gitleaks...'
+        sh '''
+            gitleaks detect --source . --verbose --no-git --report-format json --report-path gitleaks-report.json || true
+            if [ -f gitleaks-report.json ]; then
+                echo "Rapport Gitleaks :"
+                cat gitleaks-report.json
+            else
+                echo "Aucun secret détecté."
+            fi
+        '''
+    }
+}
