@@ -5,7 +5,6 @@ pipeline {
         GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         IMAGE_API = "devsecops-api:${GIT_SHA}"
         IMAGE_FRONT = "devsecops-portfolio:${GIT_SHA}"
-        // Valeur factice: prisma generate ne se connecte pas à la base
         DATABASE_URL = 'postgresql://user:pass@localhost:5432/db'
     }
 
@@ -62,33 +61,35 @@ pipeline {
             }
         }
 
-stage('Gitleaks - Scan des secrets') {
-    steps {
-        echo 'Scan des secrets avec Gitleaks...'
-        sh '''
-            gitleaks detect --source . --verbose --no-git --config .gitleaks.toml --report-format json --report-path gitleaks-report.json --exit-code=1 || true
-            if [ -f gitleaks-report.json ]; then
-                echo "Rapport Gitleaks :"
-                cat gitleaks-report.json
-            else
-                echo "Aucun secret détecté."
-            fi
-        '''
-    }
-}
-stage('Build API Image') {
-    steps {
-        echo "Construction de l'image ${IMAGE_API}..."
-        sh "docker build --no-cache -t ${IMAGE_API} -t devsecops-api:latest ./api"
-    }
-}
+        stage('Gitleaks - Scan des secrets') {
+            steps {
+                echo 'Scan des secrets avec Gitleaks...'
+                sh '''
+                    gitleaks detect --source . --verbose --no-git --config .gitleaks.toml --report-format json --report-path gitleaks-report.json --exit-code=1 || true
+                    if [ -f gitleaks-report.json ]; then
+                        echo "Rapport Gitleaks :"
+                        cat gitleaks-report.json
+                    else
+                        echo "Aucun secret détecté."
+                    fi
+                '''
+            }
+        }
 
-stage('Build Frontend Image') {
-    steps {
-        echo "Construction de l'image ${IMAGE_FRONT}..."
-        sh "docker build --no-cache -t ${IMAGE_FRONT} -t devsecops-portfolio:latest ./my-cv-next"
-    }
-}
+        stage('Build API Image') {
+            steps {
+                echo "Construction de l'image ${IMAGE_API}..."
+                sh "docker build --no-cache -t ${IMAGE_API} -t devsecops-api:latest ./api"
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                echo "Construction de l'image ${IMAGE_FRONT}..."
+                sh "docker build --no-cache -t ${IMAGE_FRONT} -t devsecops-portfolio:latest ./my-cv-next"
+            }
+        }
+
         stage('Verify Images') {
             steps {
                 echo 'Vérification des images construites...'
@@ -104,20 +105,5 @@ stage('Build Frontend Image') {
         failure {
             echo 'Pipeline échoué. Vérifiez les logs.'
         }
-    }
-}
-
-stage('Gitleaks - Scan des secrets') {
-    steps {
-        echo 'Scan des secrets avec Gitleaks...'
-        sh '''
-            gitleaks detect --source . --verbose --no-git --config .gitleaks.toml --report-format json --report-path gitleaks-report.json --exit-code=1 || true
-            if [ -f gitleaks-report.json ]; then
-                echo "Rapport Gitleaks :"
-                cat gitleaks-report.json
-            else
-                echo "Aucun secret détecté."
-            fi
-        '''
     }
 }
