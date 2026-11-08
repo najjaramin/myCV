@@ -1,0 +1,10 @@
+title = "Gitleaks config"
+
+[allowlist]
+  description = "Fichiers à ignorer"
+  paths = [
+    '''my-cv-next/\.next/''',
+    '''vagrant/\.vagrant/''',
+    '''gitleaks-report\.json''',
+    '''node_modules/''',
+  ]
