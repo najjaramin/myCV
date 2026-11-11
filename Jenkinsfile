@@ -5,7 +5,6 @@ pipeline {
         GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         IMAGE_API = "devsecops-api:${GIT_SHA}"
         IMAGE_FRONT = "devsecops-portfolio:${GIT_SHA}"
-        // Valeur factice : prisma generate ne se connecte pas à la base
         DATABASE_URL = 'postgresql://user:pass@localhost:5432/db'
     }
 
@@ -66,6 +65,26 @@ pipeline {
                 echo 'Exécution des tests de l\'API...'
                 dir('api') {
                     sh 'npm test'
+                }
+            }
+        }
+
+        stage('Semgrep - SAST') {
+            steps {
+                echo 'Analyse SAST avec Semgrep...'
+                sh 'mkdir -p reports'
+                sh 'semgrep scan --config p/javascript --config p/nodejs --config p/owasp-top-ten --exclude node_modules --exclude .next --exclude reports --severity ERROR --error --metrics=off --json-output=reports/semgrep.json api my-cv-next || true'
+            }
+        }
+
+        stage('NPM Audit - Dépendances') {
+            steps {
+                echo 'Contrôle des dépendances avec npm audit...'
+                dir('api') {
+                    sh 'npm audit --audit-level=high || true'
+                }
+                dir('my-cv-next') {
+                    sh 'npm audit --audit-level=high || true'
                 }
             }
         }
