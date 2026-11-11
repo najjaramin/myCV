@@ -123,3 +123,23 @@ pipeline {
         }
     }
 }
+//        stage('OWASP Dependency-Check') {
+//            steps {
+//                echo 'Analyse OWASP Dependency-Check...'
+//                dir('api') {
+//                    sh 'dependency-check --project "API Portfolio" --scan . --format JSON --out /tmp/dependency-check-api.json || true'
+//                    sh 'cat /tmp/dependency-check-api.json | head -50'
+//                }
+//                dir('my-cv-next') {
+//                    sh 'dependency-check --project "Frontend Portfolio" --scan . --format JSON --out /tmp/dependency-check-front.json || true'
+//                    sh 'cat /tmp/dependency-check-front.json | head -50'
+//                }
+//            }
+//        }
+        stage('Trivy - Scan des images') {
+            steps {
+                echo 'Scan des images Docker avec Trivy...'
+                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-api:latest || true'
+                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-portfolio:latest || true'
+            }
+        }
