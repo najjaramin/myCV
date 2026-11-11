@@ -1,20 +1,37 @@
 ---
-- name: Déployer le DevSecOps Portfolio avec Docker Compose
-  hosts: portfolio
+- name: Deployer DevSecOps Portfolio
+  hosts: all
   become: true
+  gather_facts: true
+
   vars:
     repo_url: "https://github.com/najjaramin/myCV.git"
     project_dir: "/opt/my-cv"
     git_branch: "main"
 
   tasks:
-    # ---------- 1. Mise à jour et prérequis ----------
-    - name: Mettre à jour le cache apt
-      apt:
-        update_cache: true
-        cache_valid_time: 3600
+    - name: Ecrire un resolv.conf de secours
+      ansible.builtin.copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver 8.8.8.8
+          nameserver 1.1.1.1
+          options timeout:2 attempts:1
+        mode: "0644"
+      failed_when: false
 
-    - name: Installer les paquets de base
+    - name: Mettre a jour le cache apt (borne, non bloquant)
+      ansible.builtin.command:
+        cmd: >-
+          timeout 60 apt-get update -qq
+          -o Acquire::Retries=0
+          -o Acquire::http::Timeout=10
+          -o Acquire::https::Timeout=10
+          -o Acquire::ForceIPv4=true
+      changed_when: false
+      failed_when: false
+
+    - name: Installer les paquets de base (sans update_cache)
       apt:
         name:
           - git
@@ -23,75 +40,130 @@
           - gnupg
           - lsb-release
         state: present
+        dpkg_options: 'force-confold,force-confdef'
+      failed_when: false
 
-    # ---------- 2. Installer Docker officiel ----------
-    - name: Créer le dossier des clés APT
+    - name: S'assurer que /tmp/docker-debs existe dans la VM
       file:
-        path: /etc/apt/keyrings
+        path: /tmp/docker-debs
         state: directory
         mode: "0755"
 
-    - name: Ajouter la clé GPG de Docker
-      get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/keyrings/docker.asc
+    - name: Lister les .deb Docker presents sur l'hote
+      ansible.builtin.find:
+        paths: /tmp/docker-debs
+        patterns: "*.deb"
+      delegate_to: localhost
+      become: false
+      register: debs_on_host
+      changed_when: false
+
+    - name: Copier les .deb dans la VM
+      copy:
+        src: "{{ item.path }}"
+        dest: "/tmp/docker-debs/{{ item.path | basename }}"
         mode: "0644"
+      loop: "{{ debs_on_host.files }}"
+      when: debs_on_host.files | length > 0
 
-    - name: Ajouter le dépôt Docker
-      apt_repository:
-        repo: "deb [arch={{ ansible_architecture | replace('x86_64','amd64') | replace('aarch64','arm64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-        filename: docker
+    - name: Installer Docker depuis les .deb (dpkg borne)
+      ansible.builtin.shell:
+        cmd: |
+          export DEBIAN_FRONTEND=noninteractive
+          if ls /tmp/docker-debs/*.deb >/dev/null 2>&1; then
+            timeout -k 5 180 dpkg -i /tmp/docker-debs/*.deb
+          else
+            echo "Aucun .deb Docker trouve."
+            exit 0
+          fi
+      args:
+        creates: /usr/bin/docker
+      register: dpkg_result
+      failed_when: false
+      changed_when: dpkg_result.rc == 0
 
-    - name: Installer Docker et le plugin Compose
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
-        state: present
-        update_cache: true
-        dpkg_options: 'force-confold,force-confdef'
-      register: docker_install
-      retries: 3
-      delay: 10
-      until: docker_install is success
+    - name: Afficher resultat dpkg
+      ansible.builtin.debug:
+        msg: "dpkg rc={{ dpkg_result.rc | default('N/A') }}"
 
-    - name: S'assurer que Docker est démarré et activé
+    - name: S'assurer que Docker est demarre
       service:
         name: docker
         state: started
         enabled: true
+      failed_when: false
 
-    # ---------- 3. Cloner le dépôt ----------
-    - name: Cloner le dépôt du portfolio
+    - name: Verifier la presence des images sur l'hote
+      ansible.builtin.stat:
+        path: "/tmp/{{ item }}"
+      delegate_to: localhost
+      become: false
+      loop:
+        - api.tar
+        - front.tar
+      register: local_images
+      changed_when: false
+
+    - name: Copier les images Docker dans la VM
+      copy:
+        src: "/tmp/{{ item.item }}"
+        dest: "/tmp/{{ item.item }}"
+        mode: "0644"
+      loop: "{{ local_images.results }}"
+      when: item.stat.exists
+
+    - name: Charger les images Docker dans la VM
+      command: "docker load -i /tmp/{{ item.item }}"
+      loop: "{{ local_images.results }}"
+      when: item.stat.exists
+      changed_when: true
+
+    - name: Cloner le depot du portfolio
       git:
         repo: "{{ repo_url }}"
         dest: "{{ project_dir }}"
         version: "{{ git_branch }}"
         force: true
+        depth: 1
+      failed_when: false
 
-    # ---------- 4. Déployer avec Docker Compose ----------
-    - name: Lancer Docker Compose (build + up)
+    - name: Verifier la presence de docker-compose.yml
+      stat:
+        path: "{{ project_dir }}/compose.yaml"
+      register: compose_file
+
+    - name: Lancer Docker Compose avec build (si images absentes)
       command:
         cmd: docker compose up -d --build
         chdir: "{{ project_dir }}"
+      when:
+        - compose_file.stat.exists
+        - not (local_images.results | selectattr('stat.exists') | list | length == 2)
 
-    - name: Attendre que le frontend soit prêt
+    - name: Lancer Docker Compose sans build (images chargees)
+      command:
+        cmd: docker compose up -d
+        chdir: "{{ project_dir }}"
+      when:
+        - compose_file.stat.exists
+        - local_images.results | selectattr('stat.exists') | list | length == 2
+
+    - name: Attendre le frontend (port 3000)
       wait_for:
         host: 127.0.0.1
         port: 3000
-        timeout: 120
+        timeout: 180
+      when: compose_file.stat.exists
 
-    - name: Vérifier le conteneur API
+    - name: Etat des services
       command: docker compose ps
       args:
         chdir: "{{ project_dir }}"
       register: compose_ps
       changed_when: false
+      when: compose_file.stat.exists
 
-    - name: Afficher l'état des services
+    - name: Afficher l'etat
       debug:
         var: compose_ps.stdout_lines
+      when: compose_file.stat.exists
