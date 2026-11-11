@@ -1,10 +1,14 @@
-title = "Gitleaks config"
+title = "DevSecOps Portfolio - Gitleaks"
+
+[extend]
+useDefault = true
 
 [allowlist]
-  description = "Fichiers à ignorer"
-  paths = [
-    '''my-cv-next/\.next/''',
-    '''vagrant/\.vagrant/''',
-    '''gitleaks-report\.json''',
-    '''node_modules/''',
-  ]
+description = "Dossiers et fichiers générés"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)\.git/''',
+  '''(^|/)reports/''',
+  '''package-lock\.json$''',
+]

@@ -7,3 +7,13 @@ node_modules/
 .DS_Store
 gitleaks-report.json
 .gitleaks.toml
+
+# Rapports et artefacts locaux
+reports/
+*.tar.gz
+demo-secret.txt
+
+# Rapports et artefacts locaux
+reports/
+*.tar.gz
+demo-secret.txt
