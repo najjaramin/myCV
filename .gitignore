@@ -17,3 +17,4 @@ demo-secret.txt
 reports/
 *.tar.gz
 demo-secret.txt
+.vagrant/

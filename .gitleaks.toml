@@ -9,6 +9,8 @@ paths = [
   '''(^|/)node_modules/''',
   '''(^|/)\.next/''',
   '''(^|/)\.git/''',
+  '''(^|/)\.vagrant/''',
   '''(^|/)reports/''',
   '''package-lock\.json$''',
+  '''README\.md$''',
 ]
