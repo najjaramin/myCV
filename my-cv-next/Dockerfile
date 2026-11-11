@@ -1,8 +1,10 @@
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 
 WORKDIR /app
+RUN chown node:node /app
+USER node
 
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 
 RUN npm config set fetch-retries 5 \
  && npm config set fetch-retry-mintimeout 20000 \
@@ -10,7 +12,7 @@ RUN npm config set fetch-retries 5 \
  && npm config set fetch-timeout 600000 \
  && npm ci
 
-COPY . .
+COPY --chown=node:node . .
 
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
