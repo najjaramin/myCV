@@ -73,7 +73,7 @@ pipeline {
             steps {
                 echo 'Analyse SAST avec Semgrep...'
                 sh 'mkdir -p reports'
-                sh 'semgrep scan --config p/javascript --config p/nodejs --config p/owasp-top-ten --exclude node_modules --exclude .next --exclude reports --severity ERROR --error --metrics=off --json-output=reports/semgrep.json api my-cv-next || true'
+                sh 'semgrep scan --config p/javascript --config p/nodejs --config p/owasp-top-ten --exclude node_modules --exclude .next --exclude reports --severity ERROR --error --metrics=off --json-output=reports/semgrep.json api my-cv-next'
             }
         }
 
@@ -113,8 +113,8 @@ pipeline {
         stage('Trivy - Scan des images') {
             steps {
                 echo 'Scan des images Docker avec Trivy...'
-                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-api:latest || true'
-                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-portfolio:latest || true'
+                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-api:latest'
+                sh 'trivy image --exit-code 1 --severity CRITICAL devsecops-portfolio:latest'
             }
         }
     }
