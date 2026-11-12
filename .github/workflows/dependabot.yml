@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Pour l'API
+  - package-ecosystem: "npm"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+  
+  # Pour le Frontend
+  - package-ecosystem: "npm"
+    directory: "/my-cv-next"
+    schedule:
+      interval: "weekly"
