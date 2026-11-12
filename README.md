@@ -1275,3 +1275,26 @@ Scan intégré	Oui (Trivy automatique)	Non (nécessite des Actions)
 RBAC	Avancé (projets, robot accounts)	Basique (lié au compte GitHub)
 Rétention	Politiques avancées	Limité
 Coût	Infrastructure à payer	Inclus dans GitHub
+
+## 21. Software Supply Chain Security (Étapes 96 à 105)
+
+La sécurité de la chaîne d'approvisionnement logicielle (Supply Chain Security) garantit que les images déployées proviennent bien de notre code source et n'ont pas été altérées.
+
+### 21.1 SBOM avec Syft (Étapes 96-98)
+Le **SBOM (Software Bill of Materials)** liste toutes les dépendances d'une image. Il est généré avec **Syft** dans GitHub Actions. Le fichier `sbom-api.spdx.json` est conservé comme artefact (Étape 97) et peut être attaché à une Release GitHub (Étape 98).
+
+### 21.2 Signature avec Cosign (Étapes 99-100)
+Les images sont signées avec **Sigstore/Cosign** en mode "Keyless" (sans clé privée, via l'OIDC de GitHub Actions).
+```bash
+cosign sign -y ghcr.io/najjaramin/myCV/devsecops-api:test
+cosign verify ghcr.io/najjaramin/myCV/devsecops-api:test
+21.3 Provenance et SLSA (Étapes 101-103)
+Attestations de build : GitHub Actions génère automatiquement une provenance SLSA. Elle prouve quel commit a produit l'image et par quel workflow.
+
+SLSA (Supply-chain Levels for Software Artifacts) : Notre pipeline est au niveau Build L2 (provenance signée générée par une plateforme hébergée comme GitHub Actions).
+
+in-toto : Framework utilisé pour formater les attestations de provenance (c'est ce que SLSA utilise en interne).
+
+21.4 Blocage des images non signées (Étapes 104-105)
+Le workflow vérifie la signature avant tout déploiement. Si l'image n'est pas signée (simulation d'attaque), le pipeline échoue avec l'erreur Error: no signatures found.
+Cela empêche une attaque de type "Supply Chain" (injection d'une image malveillante dans le registre).
