@@ -70,7 +70,7 @@ jobs:
             --severity ERROR --error --metrics=off \
             --json-output=semgrep-report.json api my-cv-next
 
-    build-images:
+  build-images:
     runs-on: ubuntu-latest
     needs: [test-frontend, test-api]
     steps:
@@ -92,8 +92,8 @@ jobs:
         with:
           image-ref: 'devsecops-api:test'
           format: 'table'
-          exit-code: '1' # Fait échouer le workflow si faille trouvée
-          ignore-unfixed: true # Ignore les failles sans correctif (comme zlib1g)
+          exit-code: '1'
+          ignore-unfixed: true
           severity: 'CRITICAL'
           vuln-type: 'os,library'
 
