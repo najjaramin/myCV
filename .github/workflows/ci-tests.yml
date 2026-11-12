@@ -70,21 +70,12 @@ jobs:
             --severity ERROR --error --metrics=off \
             --json-output=semgrep-report.json api my-cv-next
 
-  build-images:
+    build-images:
     runs-on: ubuntu-latest
     needs: [test-frontend, test-api]
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
-      - name: 🔍 DEBUG - Voir les fichiers sur GitHub
-        run: |
-          echo "=== Racine du dépôt ==="
-          ls -la
-          echo "=== Dossier API ==="
-          ls -la api/
-          echo "=== Dossier Frontend ==="
-          ls -la my-cv-next/
 
       - name: Build Image API
         run: |
@@ -95,3 +86,23 @@ jobs:
         run: |
           docker build -t devsecops-portfolio:test ./my-cv-next
           echo "✅ Image Frontend construite"
+
+      - name: Run Trivy (Scan de l'API)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'devsecops-api:test'
+          format: 'table'
+          exit-code: '1' # Fait échouer le workflow si faille trouvée
+          ignore-unfixed: true # Ignore les failles sans correctif (comme zlib1g)
+          severity: 'CRITICAL'
+          vuln-type: 'os,library'
+
+      - name: Run Trivy (Scan du Frontend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'devsecops-portfolio:test'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL'
+          vuln-type: 'os,library'
