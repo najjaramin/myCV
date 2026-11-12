@@ -1,10 +1,14 @@
-name: CI - Tests Frontend et API
+name: CI - Tests et Sécurité
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   test-frontend:
@@ -26,6 +30,9 @@ jobs:
       - name: Exécution des tests (Frontend)
         run: cd my-cv-next && npm test
 
+      - name: NPM Audit (Frontend)
+        run: cd my-cv-next && npm audit --audit-level=high || true
+
   test-api:
     runs-on: ubuntu-latest
     steps:
@@ -44,3 +51,27 @@ jobs:
 
       - name: Exécution des tests (API)
         run: cd api && npm test
+
+      - name: NPM Audit (API)
+        run: cd api && npm audit --audit-level=high || true
+
+  security-scans:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Gitleaks (Scan des secrets)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Installation de Semgrep
+        run: pip install semgrep
+
+      - name: Semgrep (SAST)
+        run: |
+          semgrep scan --config p/javascript --config p/nodejs --config p/owasp-top-ten \
+            --exclude node_modules --exclude .next --exclude reports \
+            --severity ERROR --error --metrics=off \
+            --json-output=semgrep-report.json api my-cv-next
