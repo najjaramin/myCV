@@ -1223,3 +1223,55 @@ Nous utilisons la convention **Conventional Commits** :
 Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
 - La version `v1.0.0` a été publiée sur GitHub (tag `Latest`) via l'onglet Releases.
 - Cela correspond à la première version stable du portfolio.
+
+## 20. Registre privé Harbor (Étapes 90 à 95)
+
+Harbor a été choisi comme registre privé de conteneurs pour sécuriser la chaîne d'approvisionnement (Supply Chain) et stocker nos images Docker de manière contrôlée.
+
+### 20.1 Installation et architecture (Étape 90)
+Harbor a été installé via le script officiel (Offline Installer). Il est composé de plusieurs conteneurs (Core, Database, Jobservice, Registry, Portal, Trivy).
+- **URL** : `https://harbor.local`
+- **Port** : 443 (HTTPS)
+
+### 20.2 Publication des images (Étape 91)
+Le pipeline Jenkins a été configuré pour pousser les images dans Harbor avec les tags correspondants au Git SHA, en plus du tag `latest`.
+```bash
+docker login harbor.local -u robot\$jenkins -p <TOKEN>
+docker tag devsecops-api:f89e1e5 harbor.local/library/devsecops-api:f89e1e5
+docker push harbor.local/library/devsecops-api:f89e1e5
+Image API : harbor.local/library/devsecops-api:latest
+
+Image Frontend : harbor.local/library/devsecops-portfolio:latest
+
+20.3 Permissions et RBAC (Étape 92)
+La sécurité de Harbor repose sur le RBAC (Role-Based Access Control).
+
+Un projet privé library a été créé.
+
+Un Robot Account (robot$jenkins) a été généré pour le pipeline Jenkins, avec les droits Push et Pull uniquement, respectant ainsi le principe du moindre privilège (pas de droits d'administration).
+
+20.4 Scan automatique vs Trivy Jenkins (Étape 93)
+Harbor intègre nativement Trivy pour scanner les images.
+
+Configuration : L'option "Automatically scan images on push" a été activée dans les paramètres du projet.
+
+Comparaison :
+
+Jenkins (Trivy) : Scanne avant le push (Shift Left). Bloque le pipeline en cas de faille critique.
+
+Harbor : Scanne après le push. Empêche le téléchargement (Pull) de l'image si elle contient des vulnérabilités critiques.
+
+20.5 Politique de rétention (Étape 94)
+Une politique de rétention a été configurée pour éviter la saturation du disque :
+
+Règle : "Keep the most recent 10 tags" par dépôt.
+
+Les anciennes images (basées sur le Git SHA) sont automatiquement supprimées après 10 builds.
+
+20.6 Comparaison Harbor vs GHCR (Étape 95)
+Critère	Harbor (Auto-hébergé)	GHCR (GitHub)
+Hébergement	Serveur local (contrôle total)	Cloud GitHub
+Scan intégré	Oui (Trivy automatique)	Non (nécessite des Actions)
+RBAC	Avancé (projets, robot accounts)	Basique (lié au compte GitHub)
+Rétention	Politiques avancées	Limité
+Coût	Infrastructure à payer	Inclus dans GitHub
