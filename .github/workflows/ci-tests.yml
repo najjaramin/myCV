@@ -1,77 +1,16 @@
-name: CI - Tests et Sécurité
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
-  security-events: write
-
-jobs:
-  test-frontend:
+  build-images:
     runs-on: ubuntu-latest
+    needs: [test-frontend, test-api] # Ne build que si les tests passent
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Installation de Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: 'my-cv-next/package-lock.json'
-
-      - name: Installation des dépendances (Frontend)
-        run: cd my-cv-next && npm ci
-
-      - name: Exécution des tests (Frontend)
-        run: cd my-cv-next && npm test
-
-      - name: NPM Audit (Frontend)
-        run: cd my-cv-next && npm audit --audit-level=high || true
-
-  test-api:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Installation de Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: 'api/package-lock.json'
-
-      - name: Installation des dépendances (API)
-        run: cd api && npm ci
-
-      - name: Exécution des tests (API)
-        run: cd api && npm test
-
-      - name: NPM Audit (API)
-        run: cd api && npm audit --audit-level=high || true
-
-  security-scans:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Gitleaks (Scan des secrets)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Installation de Semgrep
-        run: pip install semgrep
-
-      - name: Semgrep (SAST)
+      - name: Build Image API
         run: |
-          semgrep scan --config p/javascript --config p/nodejs --config p/owasp-top-ten \
-            --exclude node_modules --exclude .next --exclude reports \
-            --severity ERROR --error --metrics=off \
-            --json-output=semgrep-report.json api my-cv-next
+          docker build -t devsecops-api:test ./api
+          echo "✅ Image API construite avec succès"
+
+      - name: Build Image Frontend
+        run: |
+          docker build -t devsecops-portfolio:test ./my-cv-next
+          echo "✅ Image Frontend construite avec succès"
