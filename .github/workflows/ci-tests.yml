@@ -1,0 +1,46 @@
+name: CI - Tests Frontend et API
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'my-cv-next/package-lock.json'
+
+      - name: Installation des dépendances (Frontend)
+        run: cd my-cv-next && npm ci
+
+      - name: Exécution des tests (Frontend)
+        run: cd my-cv-next && npm test
+
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'api/package-lock.json'
+
+      - name: Installation des dépendances (API)
+        run: cd api && npm ci
+
+      - name: Exécution des tests (API)
+        run: cd api && npm test
