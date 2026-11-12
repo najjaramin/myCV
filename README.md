@@ -1195,3 +1195,31 @@ git push origin main
 Vérifier ensuite le dépôt distant : https://github.com/najjaramin/myCV
 
 Ne pas ajouter les fichiers `.env`, `.env.local`, les clés SSH, les tokens ou les credentials Jenkins au dépôt.
+
+## 18. Git Workflow (Étapes 79 à 84)
+
+### 18.1 Stratégie Git (Étape 79)
+Nous utilisons une stratégie basée sur les Pull Requests. Aucun push direct sur `main` n'est autorisé.
+- **Convention de nommage des branches** :
+  - `feat/nom-de-la-fonctionnalite` (nouvelle fonctionnalité)
+  - `fix/nom-du-bug` (correction)
+  - `docs/mise-a-jour-readme` (documentation)
+  - `ci/ajout-workflow` (pipeline)
+
+### 18.2 Protection de la branche main (Étapes 80-81)
+La branche `main` est protégée via un **Ruleset** GitHub :
+- **Require a pull request before merging** : Les push directs sont interdits.
+- **Require status checks to pass** : Le merge nécessite le passage au vert des contrôles CI (`test-frontend`, `test-api`, `security-scans`, `build-images`).
+- **Block force pushes** : Empêche l'écrasement de l'historique Git.
+
+### 18.3 Conventional Commits (Étape 82)
+Nous utilisons la convention **Conventional Commits** :
+- `feat: ajout du formulaire`
+- `fix: correction de la validation`
+- `docs: mise à jour du README`
+- `ci: ajout du workflow GitHub Actions`
+
+### 18.4 Semantic Versioning et Releases (Étapes 83-84)
+Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
+- La version `v1.0.0` a été publiée sur GitHub (tag `Latest`) via l'onglet Releases.
+- Cela correspond à la première version stable du portfolio.
