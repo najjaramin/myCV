@@ -1224,6 +1224,46 @@ Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
 - La version `v1.0.0` a été publiée sur GitHub (tag `Latest`) via l'onglet Releases.
 - Cela correspond à la première version stable du portfolio.
 
+ docs/optimisation-docker-85-89
+## 19. Optimisation des images Docker (Étapes 85 à 89)
+
+### 19.1 Relevé des indicateurs et comparaison (Étapes 85 et 87)
+
+Grâce aux logs de Jenkins et aux commandes Docker, voici la comparaison avant et après l'optimisation :
+
+| Indicateur | Image API (Avant) | Image API (Après) | Image Frontend (Avant) | Image Frontend (Après) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Taille** | ~1.04 GB | ~282 MB | ~1.47 GB | ~419 MB |
+| **Temps de build** | ~7 min | ~2 min | ~4 min | ~2 min |
+| **Vulnérabilités (Trivy)** | 1 CRITICAL | 0 CRITICAL | 0 CRITICAL | 0 CRITICAL |
+
+L'utilisation de builds multi-stage a permis de réduire considérablement la taille des images en ne gardant que le strict nécessaire pour la production.
+
+### 19.2 Build multi-stage et BuildKit (Étapes 86 et 88)
+
+- **Multi-stage (Étape 86)** : Les Dockerfiles Next.js et Express utilisent plusieurs étapes. L'étape `builder` installe toutes les dépendances (y compris celles de développement) et compile l'application. L'étape finale ne copie que le code compilé et les dépendances de production.
+- **BuildKit (Étape 88)** : Activé par défaut sur Docker récent et sur GitHub Actions (`ubuntu-latest`). Il permet des builds parallèles et un cache plus efficace, réduisant le temps de build.
+
+### 19.3 Image multi-architecture (Étape 89)
+
+Nous avons utilisé **Docker Buildx** pour créer une image compatible `amd64` (serveurs classiques) et `arm64` (Mac M1/M2, AWS Graviton).
+
+Commande utilisée :
+```bash
+docker buildx create --use
+docker buildx build --platform linux/amd64,linux/arm64 -t devsecops-api:multi ./api
+docker buildx imagetools inspect devsecops-api:multi
+
+### 19.3 Image multi-architecture (Étape 89)
+
+Nous avons utilisé **Docker Buildx** pour créer une image compatible `amd64` (serveurs classiques) et `arm64` (Mac M1/M2, AWS Graviton).
+
+Commande utilisée :
+```bash
+docker buildx create --use
+docker buildx build --platform linux/amd64,linux/arm64 -t devsecops-api:multi ./api
+docker buildx imagetools inspect devsecops-api:multi 
+
 ## 20. Registre privé Harbor (Étapes 90 à 95)
 
 Harbor a été choisi comme registre privé de conteneurs pour sécuriser la chaîne d'approvisionnement (Supply Chain) et stocker nos images Docker de manière contrôlée.
@@ -1298,3 +1338,4 @@ in-toto : Framework utilisé pour formater les attestations de provenance (c'est
 21.4 Blocage des images non signées (Étapes 104-105)
 Le workflow vérifie la signature avant tout déploiement. Si l'image n'est pas signée (simulation d'attaque), le pipeline échoue avec l'erreur Error: no signatures found.
 Cela empêche une attaque de type "Supply Chain" (injection d'une image malveillante dans le registre).
+ main
