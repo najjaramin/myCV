@@ -1196,6 +1196,21 @@ Vérifier ensuite le dépôt distant : https://github.com/najjaramin/myCV
 
 Ne pas ajouter les fichiers `.env`, `.env.local`, les clés SSH, les tokens ou les credentials Jenkins au dépôt.
 
+ docs/git-workflow-82-84
+### 18.3 Conventional Commits (Étape 82)
+Nous utilisons la convention **Conventional Commits** pour standardiser nos messages de commit :
+- `feat: ajout du formulaire de contact`
+- `fix: correction de la validation email`
+- `docs: mise à jour du README`
+- `ci: ajout du workflow GitHub Actions`
+
+Cette convention permet de générer automatiquement un changelog et de comprendre l'historique du projet.
+
+### 18.4 Semantic Versioning et Releases (Étapes 83-84)
+Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
+- `v1.0.0` : Version initiale stable.
+- Une Release a été publiée sur GitHub avec le tag `v1.0.0` et marquée comme `Latest`.
+
 ## 18. Git Workflow (Étapes 79 à 84)
 
 ### 18.1 Stratégie Git (Étape 79)
