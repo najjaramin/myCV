@@ -2,24 +2,36 @@ Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu2204"
   config.vm.hostname = "portfolio-vm"
 
+  # Désactiver le synced folder rsync (casse le réseau, inutile ici)
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
   # ---------- Réseau ----------
   config.vm.network "private_network", ip: "192.168.56.10"
   config.vm.network "forwarded_port", guest: 3000, host: 3000
   config.vm.network "forwarded_port", guest: 4000, host: 4000
 
   # ---------- Ressources ----------
-  # Note : On utilise 'libvirt' car c'est le provider par défaut sur votre système
   config.vm.provider "libvirt" do |lv|
     lv.memory = 3048
     lv.cpus   = 2
   end
 
-  # ---------- Provisionnement Ansible ----------
+  # ---------- Provision 1 : fix DNS ----------
+  config.vm.provision "shell", name: "fix-dns", inline: <<-SHELL
+    set -e
+    systemctl disable --now systemd-resolved 2>/dev/null || true
+    rm -f /etc/resolv.conf
+    printf 'nameserver 8.8.8.8\nnameserver 1.1.1.1\noptions timeout:2 attempts:1\n' > /etc/resolv.conf
+    chmod 644 /etc/resolv.conf
+    echo "=== Test DNS ==="
+    getent hosts download.docker.com || true
+  SHELL
+
+  # ---------- Provision 2 : Ansible ----------
   config.vm.provision "ansible" do |ansible|
-    ansible.playbook          = "../ansible/deploy-portfolio.yml"
-    ansible.inventory_path    = "../ansible/inventory"
-    ansible.limit             = "all"
+    ansible.playbook           = "../ansible/deploy-portfolio.yml"
+    ansible.limit              = "all"
     ansible.compatibility_mode = "2.0"
-    ansible.verbose           = true
+    ansible.verbose            = true
   end
 end
