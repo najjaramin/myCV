@@ -1196,6 +1196,7 @@ Vérifier ensuite le dépôt distant : https://github.com/najjaramin/myCV
 
 Ne pas ajouter les fichiers `.env`, `.env.local`, les clés SSH, les tokens ou les credentials Jenkins au dépôt.
 
+ docs/git-workflow-82-84
 ### 18.3 Conventional Commits (Étape 82)
 Nous utilisons la convention **Conventional Commits** pour standardiser nos messages de commit :
 - `feat: ajout du formulaire de contact`
@@ -1209,3 +1210,107 @@ Cette convention permet de générer automatiquement un changelog et de comprend
 Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
 - `v1.0.0` : Version initiale stable.
 - Une Release a été publiée sur GitHub avec le tag `v1.0.0` et marquée comme `Latest`.
+
+## 18. Git Workflow (Étapes 79 à 84)
+
+### 18.1 Stratégie Git (Étape 79)
+Nous utilisons une stratégie basée sur les Pull Requests. Aucun push direct sur `main` n'est autorisé.
+- **Convention de nommage des branches** :
+  - `feat/nom-de-la-fonctionnalite` (nouvelle fonctionnalité)
+  - `fix/nom-du-bug` (correction)
+  - `docs/mise-a-jour-readme` (documentation)
+  - `ci/ajout-workflow` (pipeline)
+
+### 18.2 Protection de la branche main (Étapes 80-81)
+La branche `main` est protégée via un **Ruleset** GitHub :
+- **Require a pull request before merging** : Les push directs sont interdits.
+- **Require status checks to pass** : Le merge nécessite le passage au vert des contrôles CI (`test-frontend`, `test-api`, `security-scans`, `build-images`).
+- **Block force pushes** : Empêche l'écrasement de l'historique Git.
+
+### 18.3 Conventional Commits (Étape 82)
+Nous utilisons la convention **Conventional Commits** :
+- `feat: ajout du formulaire`
+- `fix: correction de la validation`
+- `docs: mise à jour du README`
+- `ci: ajout du workflow GitHub Actions`
+
+### 18.4 Semantic Versioning et Releases (Étapes 83-84)
+Le projet utilise le **Semantic Versioning** (MAJOR.MINOR.PATCH).
+- La version `v1.0.0` a été publiée sur GitHub (tag `Latest`) via l'onglet Releases.
+- Cela correspond à la première version stable du portfolio.
+
+## 20. Registre privé Harbor (Étapes 90 à 95)
+
+Harbor a été choisi comme registre privé de conteneurs pour sécuriser la chaîne d'approvisionnement (Supply Chain) et stocker nos images Docker de manière contrôlée.
+
+### 20.1 Installation et architecture (Étape 90)
+Harbor a été installé via le script officiel (Offline Installer). Il est composé de plusieurs conteneurs (Core, Database, Jobservice, Registry, Portal, Trivy).
+- **URL** : `https://harbor.local`
+- **Port** : 443 (HTTPS)
+
+### 20.2 Publication des images (Étape 91)
+Le pipeline Jenkins a été configuré pour pousser les images dans Harbor avec les tags correspondants au Git SHA, en plus du tag `latest`.
+```bash
+docker login harbor.local -u robot\$jenkins -p <TOKEN>
+docker tag devsecops-api:f89e1e5 harbor.local/library/devsecops-api:f89e1e5
+docker push harbor.local/library/devsecops-api:f89e1e5
+Image API : harbor.local/library/devsecops-api:latest
+
+Image Frontend : harbor.local/library/devsecops-portfolio:latest
+
+20.3 Permissions et RBAC (Étape 92)
+La sécurité de Harbor repose sur le RBAC (Role-Based Access Control).
+
+Un projet privé library a été créé.
+
+Un Robot Account (robot$jenkins) a été généré pour le pipeline Jenkins, avec les droits Push et Pull uniquement, respectant ainsi le principe du moindre privilège (pas de droits d'administration).
+
+20.4 Scan automatique vs Trivy Jenkins (Étape 93)
+Harbor intègre nativement Trivy pour scanner les images.
+
+Configuration : L'option "Automatically scan images on push" a été activée dans les paramètres du projet.
+
+Comparaison :
+
+Jenkins (Trivy) : Scanne avant le push (Shift Left). Bloque le pipeline en cas de faille critique.
+
+Harbor : Scanne après le push. Empêche le téléchargement (Pull) de l'image si elle contient des vulnérabilités critiques.
+
+20.5 Politique de rétention (Étape 94)
+Une politique de rétention a été configurée pour éviter la saturation du disque :
+
+Règle : "Keep the most recent 10 tags" par dépôt.
+
+Les anciennes images (basées sur le Git SHA) sont automatiquement supprimées après 10 builds.
+
+20.6 Comparaison Harbor vs GHCR (Étape 95)
+Critère	Harbor (Auto-hébergé)	GHCR (GitHub)
+Hébergement	Serveur local (contrôle total)	Cloud GitHub
+Scan intégré	Oui (Trivy automatique)	Non (nécessite des Actions)
+RBAC	Avancé (projets, robot accounts)	Basique (lié au compte GitHub)
+Rétention	Politiques avancées	Limité
+Coût	Infrastructure à payer	Inclus dans GitHub
+
+## 21. Software Supply Chain Security (Étapes 96 à 105)
+
+La sécurité de la chaîne d'approvisionnement logicielle (Supply Chain Security) garantit que les images déployées proviennent bien de notre code source et n'ont pas été altérées.
+
+### 21.1 SBOM avec Syft (Étapes 96-98)
+Le **SBOM (Software Bill of Materials)** liste toutes les dépendances d'une image. Il est généré avec **Syft** dans GitHub Actions. Le fichier `sbom-api.spdx.json` est conservé comme artefact (Étape 97) et peut être attaché à une Release GitHub (Étape 98).
+
+### 21.2 Signature avec Cosign (Étapes 99-100)
+Les images sont signées avec **Sigstore/Cosign** en mode "Keyless" (sans clé privée, via l'OIDC de GitHub Actions).
+```bash
+cosign sign -y ghcr.io/najjaramin/myCV/devsecops-api:test
+cosign verify ghcr.io/najjaramin/myCV/devsecops-api:test
+21.3 Provenance et SLSA (Étapes 101-103)
+Attestations de build : GitHub Actions génère automatiquement une provenance SLSA. Elle prouve quel commit a produit l'image et par quel workflow.
+
+SLSA (Supply-chain Levels for Software Artifacts) : Notre pipeline est au niveau Build L2 (provenance signée générée par une plateforme hébergée comme GitHub Actions).
+
+in-toto : Framework utilisé pour formater les attestations de provenance (c'est ce que SLSA utilise en interne).
+
+21.4 Blocage des images non signées (Étapes 104-105)
+Le workflow vérifie la signature avant tout déploiement. Si l'image n'est pas signée (simulation d'attaque), le pipeline échoue avec l'erreur Error: no signatures found.
+Cela empêche une attaque de type "Supply Chain" (injection d'une image malveillante dans le registre).
+ main
