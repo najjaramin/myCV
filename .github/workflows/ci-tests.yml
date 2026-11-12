@@ -77,11 +77,13 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Vérifier la présence des fichiers
+      - name: 🔍 DEBUG - Voir les fichiers sur GitHub
         run: |
-          echo "Contenu du dossier api :"
+          echo "=== Racine du dépôt ==="
+          ls -la
+          echo "=== Dossier API ==="
           ls -la api/
-          echo "Contenu du dossier my-cv-next :"
+          echo "=== Dossier Frontend ==="
           ls -la my-cv-next/
 
       - name: Build Image API
