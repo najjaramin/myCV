@@ -14,10 +14,9 @@ RUN npm config set fetch-retries 5 \
  && npm config set fetch-timeout 600000 \
  && npm ci --omit=dev --ignore-scripts
 
-# Génère le client Prisma DANS le conteneur
-RUN npx prisma generate
+# هنا الحل: نعطيوه DATABASE_URL وهمية
+RUN DATABASE_URL="postgresql://user:pass@localhost:5432/db" npx prisma generate
 
-# On copie le reste du code
 COPY --chown=node:node server.js projects.js skills.js profile.js ./
 
 EXPOSE 4000
